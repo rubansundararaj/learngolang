@@ -2,7 +2,9 @@ package main
 
 import "fmt"
 
+const MyName string = "Ruban T"
+
 func main() {
-	userName := "Ruban"
-	fmt.Println(userName)
+
+	fmt.Println(MyName)
 }
