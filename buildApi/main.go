@@ -3,7 +3,10 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"math/rand"
 	"net/http"
+	"strconv"
+	"time"
 
 	"github.com/gorilla/mux"
 )
@@ -28,7 +31,8 @@ var courses []Course
 //middleware
 
 func (c *Course) IsEmpty() bool {
-	return c.CourseID == "" && c.CourseName == ""
+	//return c.CourseID == "" && c.CourseName == ""
+	return c.CourseName == ""
 }
 
 func main() {
@@ -67,5 +71,31 @@ func getOneCourses(w http.ResponseWriter, r *http.Request) {
 	}
 	json.NewEncoder(w).Encode("No Course found")
 	return
+}
 
+func createOneCourse(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Here we create one course")
+	w.Header().Set("Content-Type", "application/json")
+
+	if r.Body == nil {
+		json.NewEncoder(w).Encode("Please send data")
+		return
+	}
+
+	//handle {}
+
+	var course Course
+	_ = json.NewDecoder(r.Body).Decode(&course)
+	if course.IsEmpty() {
+		json.NewEncoder(w).Encode("No data inside")
+		return
+	}
+
+	// generate unique id, string, and course
+	//append course into courses
+	rand.Seed(time.Now().UnixNano())
+	course.CourseID = strconv.Itoa(rand.Intn(100))
+	courses = append(courses, course)
+	json.NewEncoder(w).Encode("course")
+	return
 }
