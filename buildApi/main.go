@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"math/rand"
 	"net/http"
 	"strconv"
@@ -15,7 +16,7 @@ import (
 type Course struct {
 	CourseID    string  `json:"courseid"`
 	CourseName  string  `json:"coursename"`
-	CoursePrice int     `json:"price"`
+	CoursePrice int     `json:"-"`
 	Author      *Author `json:"author"`
 }
 
@@ -36,7 +37,21 @@ func (c *Course) IsEmpty() bool {
 }
 
 func main() {
+	fmt.Println("API - Autocodegen is running from Golang")
+	r := mux.NewRouter()
 
+	courses = append(courses, Course{CourseID: "2", CourseName: "React Js", CoursePrice: 100, Author: &Author{FullName: "Ruban", Website: "autocodegen.com"}})
+
+	//routing
+	r.HandleFunc("/", serveHome).Methods("GET")
+	r.HandleFunc("/courses", getAllCourses).Methods("GET")
+	r.HandleFunc("/course/{id}", getOneCourses).Methods("GET")
+	r.HandleFunc("/create", createOneCourse).Methods("POST")
+	r.HandleFunc("/course/{id}", updateOneCourse).Methods("PUT")
+	r.HandleFunc("/course/{id}", DeleteOneCourse).Methods("DELETE")
+
+	//listen to port
+	log.Fatal(http.ListenAndServe(":4000", r))
 }
 
 //controllers - file
@@ -98,4 +113,55 @@ func createOneCourse(w http.ResponseWriter, r *http.Request) {
 	courses = append(courses, course)
 	json.NewEncoder(w).Encode("course")
 	return
+}
+
+func updateOneCourse(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Here we update one course")
+	w.Header().Set("Content-Type", "application/json")
+
+	if r.Body == nil {
+		json.NewEncoder(w).Encode("Please send data")
+		return
+	}
+
+	// grab params from req
+	params := mux.Vars(r)
+
+	//loop through slice, find object with id, replace the id
+
+	for index, course := range courses {
+		if course.CourseID == params["id"] {
+			courses = append(courses[:index], courses[index+1:]...)
+			var course Course
+			_ = json.NewDecoder(r.Body).Decode(&course)
+			course.CourseID = params["id"]
+			courses = append(courses, course)
+			json.NewEncoder(w).Encode(course)
+			return
+		}
+	}
+
+	// Send reponse when id is not found
+}
+
+func DeleteOneCourse(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Delete all courses")
+
+	w.Header().Set("Content-Type", "application/json")
+
+	if r.Body == nil {
+		json.NewEncoder(w).Encode("Please send data")
+		return
+	}
+
+	// grab params from req
+	params := mux.Vars(r)
+	for index, course := range courses {
+		if course.CourseID == params["id"] {
+			courses = append(courses[:index], courses[index+1:]...)
+			json.NewEncoder(w).Encode("course deleted")
+			return
+		}
+	}
+
 }
