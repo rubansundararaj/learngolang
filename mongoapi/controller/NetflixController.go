@@ -1,11 +1,14 @@
-package NetFlixController
+package netFlixController
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"mongoapi/model"
+	"net/http"
 
+	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -75,4 +78,75 @@ func deleteAllMovie() int64 {
 
 	fmt.Println("Number of deleted movies : ", deleteCollection.DeletedCount)
 	return deleteCollection.DeletedCount
+}
+
+func getAllMovies() []primitive.M {
+	cursor, err := collection.Find(context.Background(), bson.D{{}})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var movies []primitive.M
+	for cursor.Next(context.Background()) {
+		var movie bson.M
+		err := cursor.Decode(&movie)
+		if err != nil {
+			log.Fatal(err)
+		}
+		movies = append(movies, movie)
+	}
+
+	defer cursor.Close(context.Background())
+
+	return movies
+}
+
+func GetAllMyMovies(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	allMovies := getAllMovies()
+
+	json.NewEncoder(w).Encode(allMovies)
+}
+
+func CreateMovies(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Allow-Control-Allow-Methods", "POST")
+
+	var movie model.NetFlix
+
+	_ = json.NewDecoder(r.Body).Decode(&movie)
+
+	insertOneMovie(movie)
+	json.NewEncoder(w).Encode(movie)
+}
+
+func MarkAsWatched(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Allow-Control-Allow-Methods", "PUT")
+
+	params := mux.Vars(r)
+
+	updateOneMovie(params["id"])
+
+	json.NewEncoder(w).Encode(params["id"])
+
+}
+
+func DeleteAMovie(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Allow-Control-Allow-Methods", "POST")
+
+	params := mux.Vars(r)
+	deleteOneMovie(params["id"])
+
+	json.NewEncoder(w).Encode(params["id"])
+}
+
+func DeleteAllMovies(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Allow-Control-Allow-Methods", "POST")
+
+	count := deleteAllMovie()
+
+	json.NewEncoder(w).Encode(count)
 }
