@@ -13,5 +13,4 @@ func Router() *mux.Router {
 	router.HandleFunc("/library/updateOne/{id}", LibraryController.UpdateOneBookRecord).Methods("PUT")
 	router.HandleFunc("/library/deleteOne/{id}", LibraryController.DeleteOneBookRecord).Methods("DELETE")
 	return router
-
 }

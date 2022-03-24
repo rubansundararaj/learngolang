@@ -22,6 +22,7 @@ func InsertOneBookRecord(w http.ResponseWriter, r *http.Request) {
 	if status {
 		json.NewEncoder(w).Encode("success")
 	} else {
+		w.WriteHeader(400)
 		json.NewEncoder(w).Encode("failed")
 	}
 
@@ -37,6 +38,7 @@ func GetOneBookRecord(w http.ResponseWriter, r *http.Request) {
 	if status {
 		json.NewEncoder(w).Encode(books)
 	} else {
+		w.WriteHeader(400)
 		json.NewEncoder(w).Encode("failed")
 	}
 }
@@ -55,6 +57,7 @@ func UpdateOneBookRecord(w http.ResponseWriter, r *http.Request) {
 	if status {
 		json.NewEncoder(w).Encode("success")
 	} else {
+		w.WriteHeader(400)
 		json.NewEncoder(w).Encode("failed")
 	}
 
@@ -71,6 +74,7 @@ func DeleteOneBookRecord(w http.ResponseWriter, r *http.Request) {
 	if status {
 		json.NewEncoder(w).Encode("success")
 	} else {
+		w.WriteHeader(400)
 		json.NewEncoder(w).Encode("failed")
 	}
 }
@@ -83,6 +87,7 @@ func GetAllBookRecords(w http.ResponseWriter, r *http.Request) {
 	if status {
 		json.NewEncoder(w).Encode(books)
 	} else {
+		w.WriteHeader(400)
 		json.NewEncoder(w).Encode("failed")
 	}
 }
