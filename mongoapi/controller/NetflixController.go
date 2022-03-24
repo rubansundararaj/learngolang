@@ -15,33 +15,20 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-const connectionString = "mongodb://localhost:27017/?readPreference=primary&appname=MongoDB%20Compass&directConnection=true&ssl=false"
 const dbName = "netlfix"
 const colName = "watchlist"
 
 var collection *mongo.Collection
 
 func init() {
-	//client option
-
-	// clientOption := options.Client().ApplyURI(connectionString)
-	// client, err := mongo.Connect(context.TODO(), clientOption)
-
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-
-	// fmt.Println("Mongodb connection success")
-
-	// fmt.Println("Collection instance is ready")
-
 	client := connectwithdb.InitializeAndReturnConnection()
 
 	collection = client.Database(dbName).Collection(colName)
-
 }
 
 func insertOneMovie(movie model.NetFlix) {
+	fmt.Println("Before inserting")
+	fmt.Println(movie)
 	inserted, err := collection.InsertOne(context.Background(), movie)
 	if err != nil {
 		log.Fatal(err)
@@ -120,7 +107,7 @@ func CreateMovies(w http.ResponseWriter, r *http.Request) {
 	var movie model.NetFlix
 
 	_ = json.NewDecoder(r.Body).Decode(&movie)
-
+	fmt.Println(movie)
 	insertOneMovie(movie)
 	json.NewEncoder(w).Encode(movie)
 }
